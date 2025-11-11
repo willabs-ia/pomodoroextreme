@@ -94,63 +94,80 @@ function HomePage() {
           </Text>
         </VStack>
 
-        {/* Projects Grid */}
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
-          {projects.map((project) => (
+        {/* Projects Grid or Empty State */}
+        {projects.length === 0 ? (
+          <VStack spacing={6} py={16} w="full">
+            <Text fontSize="8xl">📂</Text>
+            <VStack spacing={2}>
+              <Text fontSize="2xl" fontWeight="bold">
+                Nenhum projeto ainda
+              </Text>
+              <Text color="gray.500" textAlign="center" maxW="400px">
+                Crie seu primeiro projeto para começar a usar o Pomodoro Extreme e aumentar sua produtividade!
+              </Text>
+            </VStack>
+            <Button size="lg" colorScheme="green" leftIcon={<AddIcon />} onClick={onOpen}>
+              Criar Primeiro Projeto
+            </Button>
+          </VStack>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+            {projects.map((project) => (
+              <Box
+                key={project.id}
+                bg={cardBg}
+                p={6}
+                borderRadius="xl"
+                shadow="md"
+                borderLeft="4px"
+                borderColor={project.color}
+                cursor="pointer"
+                transition="all 0.2s"
+                _hover={{
+                  shadow: 'xl',
+                  transform: 'translateY(-4px)'
+                }}
+                onClick={() => handleStartSession(project)}
+              >
+                <VStack align="start" spacing={3}>
+                  <Text fontSize="4xl">{project.icon}</Text>
+                  <Heading size="md">{project.name}</Heading>
+                  <HStack spacing={4} fontSize="sm" color="gray.500">
+                    <Text>0 pomodoros</Text>
+                    <Text>•</Text>
+                    <Text>0h focado</Text>
+                  </HStack>
+                </VStack>
+              </Box>
+            ))}
+
+            {/* Botão Novo Projeto */}
             <Box
-              key={project.id}
               bg={cardBg}
               p={6}
               borderRadius="xl"
               shadow="md"
-              borderLeft="4px"
-              borderColor={project.color}
+              border="2px dashed"
+              borderColor="gray.400"
               cursor="pointer"
               transition="all 0.2s"
               _hover={{
-                shadow: 'xl',
-                transform: 'translateY(-4px)'
+                borderColor: 'green.400',
+                shadow: 'xl'
               }}
-              onClick={() => handleStartSession(project)}
+              onClick={onOpen}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              minH="180px"
             >
-              <VStack align="start" spacing={3}>
-                <Text fontSize="4xl">{project.icon}</Text>
-                <Heading size="md">{project.name}</Heading>
-                <HStack spacing={4} fontSize="sm" color="gray.500">
-                  <Text>0 pomodoros</Text>
-                  <Text>•</Text>
-                  <Text>0h focado</Text>
-                </HStack>
+              <VStack spacing={2} color="gray.500">
+                <AddIcon boxSize={8} />
+                <Text fontWeight="semibold">Novo Projeto</Text>
               </VStack>
             </Box>
-          ))}
-
-          {/* Botão Novo Projeto */}
-          <Box
-            bg={cardBg}
-            p={6}
-            borderRadius="xl"
-            shadow="md"
-            border="2px dashed"
-            borderColor="gray.400"
-            cursor="pointer"
-            transition="all 0.2s"
-            _hover={{
-              borderColor: 'green.400',
-              shadow: 'xl'
-            }}
-            onClick={onOpen}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            minH="180px"
-          >
-            <VStack spacing={2} color="gray.500">
-              <AddIcon boxSize={8} />
-              <Text fontWeight="semibold">Novo Projeto</Text>
-            </VStack>
-          </Box>
-        </SimpleGrid>
+          </SimpleGrid>
+        )}
 
         {/* Footer Actions */}
         <HStack spacing={4} pt={4}>

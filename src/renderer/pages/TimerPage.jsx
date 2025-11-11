@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   VStack,
@@ -7,12 +8,19 @@ import {
   Badge,
   Progress,
   Text,
+  IconButton,
+  Tooltip,
   useColorModeValue
 } from '@chakra-ui/react';
+import { ArrowBackIcon } from '@chakra-ui/icons';
 import FlipClock from '../components/FlipClock/FlipClock';
 import useTimer from '../hooks/useTimer';
+import useToast from '../hooks/useToast';
 
 function TimerPage() {
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const {
     isRunning,
     isPaused,
@@ -49,8 +57,16 @@ function TimerPage() {
     if (currentProject) {
       startTimer(currentProject.id);
     } else {
-      // TODO: Navegar para seleção de projeto
-      console.log('Selecione um projeto primeiro');
+      toast.warning('Selecione um projeto primeiro na página inicial');
+      setTimeout(() => navigate('/'), 1500);
+    }
+  };
+
+  const handleBackToHome = () => {
+    if (isRunning) {
+      toast.info('Timer em execução. Use o botão "Parar" para encerrar.');
+    } else {
+      navigate('/');
     }
   };
 
@@ -62,7 +78,22 @@ function TimerPage() {
       alignItems="center"
       justifyContent="center"
       p={4}
+      position="relative"
     >
+      {/* Back Button */}
+      <Tooltip label="Voltar para Home" placement="right">
+        <IconButton
+          icon={<ArrowBackIcon />}
+          position="absolute"
+          top={4}
+          left={4}
+          variant="ghost"
+          size="lg"
+          onClick={handleBackToHome}
+          aria-label="Voltar"
+        />
+      </Tooltip>
+
       <VStack spacing={6} w="full" maxW="500px">
         {/* Badge do tipo de timer */}
         <Badge

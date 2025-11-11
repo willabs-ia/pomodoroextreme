@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/HomePage.css';
+import {
+  Box,
+  VStack,
+  HStack,
+  Heading,
+  Text,
+  Button,
+  SimpleGrid,
+  Input,
+  IconButton,
+  useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure
+} from '@chakra-ui/react';
+import { AddIcon, SettingsIcon } from '@chakra-ui/icons';
 
 function HomePage() {
   const [projects, setProjects] = useState([]);
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     loadProjects();
@@ -19,8 +38,7 @@ function HomePage() {
     }
   };
 
-  const handleCreateProject = async (e) => {
-    e.preventDefault();
+  const handleCreateProject = async () => {
     if (!newProjectName.trim()) return;
 
     try {
@@ -32,89 +50,147 @@ function HomePage() {
       });
 
       setNewProjectName('');
-      setIsCreatingProject(false);
+      onClose();
       loadProjects();
     } catch (error) {
       console.error('Error creating project:', error);
     }
   };
 
-  const handleStartSession = (project) => {
-    // Navigate to timer page with project
-    console.log('Starting session for project:', project);
-    // TODO: Implement navigation
+  const handleStartSession = async (project) => {
+    try {
+      await window.electronAPI.startTimer({ projectId: project.id });
+      // TODO: Navegar para TimerPage ou abrir janela gadget
+      console.log('Sessão iniciada para projeto:', project.name);
+    } catch (error) {
+      console.error('Error starting session:', error);
+    }
   };
 
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+
   return (
-    <div className="page home-page">
-      <div className="home-header">
-        <h1 className="home-title">🍅 Pomodoro Extreme</h1>
-        <p className="home-subtitle">Escolha um projeto para começar sua sessão de foco</p>
-      </div>
+    <Box minH="100vh" bg={bgColor} p={8}>
+      <VStack spacing={8} maxW="1200px" mx="auto">
+        {/* Header */}
+        <VStack spacing={2}>
+          <Heading size="2xl" bgGradient="linear(to-r, red.400, orange.400)" bgClip="text">
+            🍅 Pomodoro Extreme
+          </Heading>
+          <Text fontSize="lg" color="gray.500">
+            Escolha um projeto para começar sua sessão de foco
+          </Text>
+        </VStack>
 
-      <div className="projects-grid">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="project-card"
-            onClick={() => handleStartSession(project)}
-            style={{ borderColor: project.color }}
+        {/* Projects Grid */}
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} w="full">
+          {projects.map((project) => (
+            <Box
+              key={project.id}
+              bg={cardBg}
+              p={6}
+              borderRadius="xl"
+              shadow="md"
+              borderLeft="4px"
+              borderColor={project.color}
+              cursor="pointer"
+              transition="all 0.2s"
+              _hover={{
+                shadow: 'xl',
+                transform: 'translateY(-4px)'
+              }}
+              onClick={() => handleStartSession(project)}
+            >
+              <VStack align="start" spacing={3}>
+                <Text fontSize="4xl">{project.icon}</Text>
+                <Heading size="md">{project.name}</Heading>
+                <HStack spacing={4} fontSize="sm" color="gray.500">
+                  <Text>0 pomodoros</Text>
+                  <Text>•</Text>
+                  <Text>0h focado</Text>
+                </HStack>
+              </VStack>
+            </Box>
+          ))}
+
+          {/* Botão Novo Projeto */}
+          <Box
+            bg={cardBg}
+            p={6}
+            borderRadius="xl"
+            shadow="md"
+            border="2px dashed"
+            borderColor="gray.400"
+            cursor="pointer"
+            transition="all 0.2s"
+            _hover={{
+              borderColor: 'green.400',
+              shadow: 'xl'
+            }}
+            onClick={onOpen}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            minH="180px"
           >
-            <div className="project-icon">{project.icon}</div>
-            <h3 className="project-name">{project.name}</h3>
-            <div className="project-stats">
-              <span className="stat">0 pomodoros</span>
-              <span className="stat">0h focado</span>
-            </div>
-          </div>
-        ))}
+            <VStack spacing={2} color="gray.500">
+              <AddIcon boxSize={8} />
+              <Text fontWeight="semibold">Novo Projeto</Text>
+            </VStack>
+          </Box>
+        </SimpleGrid>
 
-        {isCreatingProject ? (
-          <form className="project-card project-create-form" onSubmit={handleCreateProject}>
-            <input
-              type="text"
-              className="project-name-input"
-              placeholder="Nome do projeto"
-              value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              autoFocus
-            />
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary btn-sm">
-                Criar
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => {
-                  setIsCreatingProject(false);
-                  setNewProjectName('');
-                }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div
-            className="project-card project-add-card"
-            onClick={() => setIsCreatingProject(true)}
+        {/* Footer Actions */}
+        <HStack spacing={4} pt={4}>
+          <Button
+            leftIcon={<SettingsIcon />}
+            variant="ghost"
+            onClick={() => console.log('Open settings')}
           >
-            <div className="project-add-icon">+</div>
-            <p className="project-add-text">Novo Projeto</p>
-          </div>
-        )}
-      </div>
+            Configurações
+          </Button>
+          <Button
+            leftIcon={<Text>📊</Text>}
+            variant="ghost"
+            onClick={() => console.log('Open stats')}
+          >
+            Estatísticas
+          </Button>
+        </HStack>
+      </VStack>
 
-      <div className="home-footer">
-        <button className="btn btn-ghost" onClick={() => console.log('Open settings')}>
-          ⚙️ Configurações
-        </button>
-        <button className="btn btn-ghost" onClick={() => console.log('Open stats')}>
-          📊 Estatísticas
-        </button>
-      </div>
-    </div>
+      {/* Modal Criar Projeto */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Criar Novo Projeto</ModalHeader>
+          <ModalBody>
+            <VStack spacing={4}>
+              <Input
+                placeholder="Nome do projeto (ex: Estudos, Trabalho, etc.)"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                size="lg"
+                autoFocus
+              />
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={handleCreateProject}
+              isDisabled={!newProjectName.trim()}
+            >
+              Criar Projeto
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Box>
   );
 }
 

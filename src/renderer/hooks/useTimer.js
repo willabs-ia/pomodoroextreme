@@ -30,15 +30,31 @@ function useTimer() {
         isRunning: true,
         isPaused: false,
         type: data.type,
-        plannedDuration: data.duration
+        plannedDuration: data.duration,
+        currentProject: data.project,
+        currentSession: data.session
       }));
     };
 
     const handlePomodoroCompleted = (data) => {
       setTimerState((prev) => ({
         ...prev,
-        pomodorosCompleted: data.pomodorosCompleted || prev.pomodorosCompleted
+        pomodorosCompleted: data.pomodorosCompleted || prev.pomodorosCompleted + 1
       }));
+    };
+
+    const handleBreakStarted = (data) => {
+      setTimerState((prev) => ({
+        ...prev,
+        isRunning: true,
+        isPaused: false,
+        type: data.type,
+        plannedDuration: data.duration
+      }));
+    };
+
+    const handleBreakCompleted = () => {
+      // Break completed, will transition to next pomodoro
     };
 
     const handlePaused = () => {
@@ -57,6 +73,15 @@ function useTimer() {
       }));
     };
 
+    const handleSessionStarted = (data) => {
+      setTimerState((prev) => ({
+        ...prev,
+        currentSession: data.session,
+        currentProject: data.project,
+        blockLevel: data.blockLevel
+      }));
+    };
+
     const handleSessionEnded = () => {
       setTimerState({
         isRunning: false,
@@ -72,12 +97,30 @@ function useTimer() {
       });
     };
 
+    // Register all event listeners
     window.electronAPI.onTimerTick(handleTick);
-    // Note: Need to implement the actual event listeners in preload
+    window.electronAPI.onPomodoroStarted(handlePomodoroStarted);
+    window.electronAPI.onPomodoroCompleted(handlePomodoroCompleted);
+    window.electronAPI.onBreakStarted(handleBreakStarted);
+    window.electronAPI.onBreakCompleted(handleBreakCompleted);
+    window.electronAPI.onTimerPaused(handlePaused);
+    window.electronAPI.onTimerResumed(handleResumed);
+    window.electronAPI.onTimerStopped(handleStopped);
+    window.electronAPI.onSessionStarted(handleSessionStarted);
+    window.electronAPI.onSessionEnded(handleSessionEnded);
 
     return () => {
       // Cleanup listeners
       window.electronAPI.removeListener?.('timer:tick', handleTick);
+      window.electronAPI.removeListener?.('pomodoro:started', handlePomodoroStarted);
+      window.electronAPI.removeListener?.('pomodoro:completed', handlePomodoroCompleted);
+      window.electronAPI.removeListener?.('break:started', handleBreakStarted);
+      window.electronAPI.removeListener?.('break:completed', handleBreakCompleted);
+      window.electronAPI.removeListener?.('timer:paused', handlePaused);
+      window.electronAPI.removeListener?.('timer:resumed', handleResumed);
+      window.electronAPI.removeListener?.('timer:stopped', handleStopped);
+      window.electronAPI.removeListener?.('session:started', handleSessionStarted);
+      window.electronAPI.removeListener?.('session:ended', handleSessionEnded);
     };
   }, []);
 

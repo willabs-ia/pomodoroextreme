@@ -1,78 +1,205 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/TimerPage.css';
+import React from 'react';
+import {
+  Box,
+  VStack,
+  HStack,
+  Button,
+  Badge,
+  Progress,
+  Text,
+  useColorModeValue
+} from '@chakra-ui/react';
+import FlipClock from '../components/FlipClock/FlipClock';
+import useTimer from '../hooks/useTimer';
 
 function TimerPage() {
-  const [timeRemaining, setTimeRemaining] = useState(25 * 60); // 25 minutes in seconds
-  const [isRunning, setIsRunning] = useState(false);
-  const [timerType, setTimerType] = useState('focus'); // focus, shortBreak, longBreak
+  const {
+    isRunning,
+    isPaused,
+    timeRemaining,
+    type,
+    pomodorosCompleted,
+    currentProject,
+    percentage,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    stopTimer
+  } = useTimer();
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  // Cor do tema baseado no tipo de timer
+  const timerColor = type === 'focus'
+    ? 'pomodoro.focus'
+    : type === 'shortBreak' || type === 'longBreak'
+    ? 'pomodoro.break'
+    : 'gray.500';
+
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+
+  const getTimerLabel = () => {
+    if (!type) return '⏱️ AGUARDANDO';
+    if (type === 'focus') return '🎯 FOCO';
+    if (type === 'shortBreak') return '☕ PAUSA CURTA';
+    if (type === 'longBreak') return '🌟 PAUSA LONGA';
+    return '⏱️ TIMER';
   };
 
-  const handleStart = () => {
-    setIsRunning(true);
-    // TODO: Send to TimerEngine
-  };
-
-  const handlePause = () => {
-    setIsRunning(false);
-    // TODO: Send to TimerEngine
-  };
-
-  const handleStop = () => {
-    setIsRunning(false);
-    setTimeRemaining(25 * 60);
-    // TODO: Send to TimerEngine
+  const handleStartClick = () => {
+    if (currentProject) {
+      startTimer(currentProject.id);
+    } else {
+      // TODO: Navegar para seleção de projeto
+      console.log('Selecione um projeto primeiro');
+    }
   };
 
   return (
-    <div className="page timer-page">
-      <div className="timer-container">
-        <div className="timer-type-badge">
-          {timerType === 'focus' ? '🎯 FOCO' : '☕ PAUSA'}
-        </div>
+    <Box
+      minH="100vh"
+      bg={bgColor}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      p={4}
+    >
+      <VStack spacing={6} w="full" maxW="500px">
+        {/* Badge do tipo de timer */}
+        <Badge
+          fontSize="lg"
+          px={4}
+          py={2}
+          borderRadius="full"
+          colorScheme={type === 'focus' ? 'red' : 'green'}
+        >
+          {getTimerLabel()}
+        </Badge>
 
-        <div className="timer-display">
-          {formatTime(timeRemaining)}
-        </div>
-
-        <div className="timer-progress">
-          <div
-            className="timer-progress-bar"
-            style={{ width: `${(timeRemaining / (25 * 60)) * 100}%` }}
+        {/* FlipClock - Display principal */}
+        <Box
+          bg={cardBg}
+          p={8}
+          borderRadius="2xl"
+          shadow="2xl"
+          w="full"
+        >
+          <FlipClock
+            timeRemaining={timeRemaining || 0}
+            type={type || 'focus'}
           />
-        </div>
+        </Box>
 
-        <div className="timer-controls">
+        {/* Barra de progresso */}
+        <Progress
+          value={percentage || 0}
+          w="full"
+          h={3}
+          borderRadius="full"
+          colorScheme={type === 'focus' ? 'red' : 'green'}
+          hasStripe
+          isAnimated={isRunning}
+        />
+
+        {/* Controles */}
+        <HStack spacing={4}>
           {!isRunning ? (
-            <button className="btn btn-primary btn-lg" onClick={handleStart}>
-              ▶️ Iniciar
-            </button>
+            <Button
+              size="lg"
+              colorScheme="green"
+              onClick={handleStartClick}
+              leftIcon={<Text>▶️</Text>}
+              px={8}
+            >
+              Iniciar
+            </Button>
+          ) : isPaused ? (
+            <Button
+              size="lg"
+              colorScheme="blue"
+              onClick={resumeTimer}
+              leftIcon={<Text>▶️</Text>}
+              px={8}
+            >
+              Retomar
+            </Button>
           ) : (
-            <button className="btn btn-warning btn-lg" onClick={handlePause}>
-              ⏸️ Pausar
-            </button>
+            <Button
+              size="lg"
+              colorScheme="yellow"
+              onClick={pauseTimer}
+              leftIcon={<Text>⏸️</Text>}
+              px={8}
+            >
+              Pausar
+            </Button>
           )}
-          <button className="btn btn-danger" onClick={handleStop}>
-            ⏹️ Parar
-          </button>
-        </div>
 
-        <div className="session-info">
-          <div className="info-item">
-            <span className="info-label">Pomodoros hoje</span>
-            <span className="info-value">0 / 8</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Tempo focado</span>
-            <span className="info-value">0h 0m</span>
-          </div>
-        </div>
-      </div>
-    </div>
+          {isRunning && (
+            <Button
+              size="lg"
+              colorScheme="red"
+              variant="outline"
+              onClick={stopTimer}
+              leftIcon={<Text>⏹️</Text>}
+            >
+              Parar
+            </Button>
+          )}
+        </HStack>
+
+        {/* Informações da sessão */}
+        <HStack
+          spacing={8}
+          bg={cardBg}
+          p={4}
+          borderRadius="xl"
+          w="full"
+          justify="space-around"
+        >
+          <VStack spacing={1}>
+            <Text fontSize="sm" color="gray.500">
+              Pomodoros Hoje
+            </Text>
+            <Text fontSize="2xl" fontWeight="bold" color={timerColor}>
+              {pomodorosCompleted || 0}
+            </Text>
+          </VStack>
+
+          <VStack spacing={1}>
+            <Text fontSize="sm" color="gray.500">
+              Projeto
+            </Text>
+            <Text fontSize="lg" fontWeight="semibold">
+              {currentProject?.name || 'Nenhum'}
+            </Text>
+          </VStack>
+        </HStack>
+
+        {/* Informação do projeto atual */}
+        {currentProject && (
+          <Box
+            bg={cardBg}
+            p={3}
+            borderRadius="lg"
+            w="full"
+            borderLeft="4px"
+            borderColor={timerColor}
+          >
+            <HStack>
+              <Text fontSize="2xl">{currentProject.icon}</Text>
+              <VStack align="start" spacing={0}>
+                <Text fontSize="sm" fontWeight="bold">
+                  {currentProject.name}
+                </Text>
+                <Text fontSize="xs" color="gray.500">
+                  Sessão ativa
+                </Text>
+              </VStack>
+            </HStack>
+          </Box>
+        )}
+      </VStack>
+    </Box>
   );
 }
 

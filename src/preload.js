@@ -16,11 +16,33 @@ contextBridge.exposeInMainWorld('electronAPI', {
   hideBlockScreen: () => ipcRenderer.send('blockscreen:hide'),
 
   // Timer
-  startTimer: (config) => ipcRenderer.send('timer:start', config),
+  startTimer: (config) => ipcRenderer.invoke('timer:start', config),
   pauseTimer: () => ipcRenderer.send('timer:pause'),
+  resumeTimer: () => ipcRenderer.send('timer:resume'),
   stopTimer: () => ipcRenderer.send('timer:stop'),
+  skipBreak: (reason) => ipcRenderer.invoke('timer:skip-break', reason),
+  getTimerState: () => ipcRenderer.invoke('timer:get-state'),
+
+  // Timer event listeners
   onTimerTick: (callback) => ipcRenderer.on('timer:tick', (_, data) => callback(data)),
-  onTimerComplete: (callback) => ipcRenderer.on('timer:complete', (_, data) => callback(data)),
+  onTimerPaused: (callback) => ipcRenderer.on('timer:paused', (_, data) => callback(data)),
+  onTimerResumed: (callback) => ipcRenderer.on('timer:resumed', (_, data) => callback(data)),
+  onTimerStopped: (callback) => ipcRenderer.on('timer:stopped', (_, data) => callback(data)),
+
+  onPomodoroStarted: (callback) => ipcRenderer.on('pomodoro:started', (_, data) => callback(data)),
+  onPomodoroCompleted: (callback) => ipcRenderer.on('pomodoro:completed', (_, data) => callback(data)),
+
+  onBreakStarted: (callback) => ipcRenderer.on('break:started', (_, data) => callback(data)),
+  onBreakCompleted: (callback) => ipcRenderer.on('break:completed', (_, data) => callback(data)),
+
+  onSessionStarted: (callback) => ipcRenderer.on('session:started', (_, data) => callback(data)),
+  onSessionEnded: (callback) => ipcRenderer.on('session:ended', (_, data) => callback(data)),
+
+  // Skip dialog events
+  onSkipShowMessage: (callback) => ipcRenderer.on('skip:show-message', (_, data) => callback(data)),
+  sendSkipMessageResponse: (confirmed) => ipcRenderer.send('skip:message-response', confirmed),
+  onSkipRequestJustification: (callback) => ipcRenderer.on('skip:request-justification', (_, data) => callback(data)),
+  sendSkipJustification: (justification) => ipcRenderer.send('skip:justification-response', justification),
 
   // Project management
   getProjects: () => ipcRenderer.invoke('projects:get-all'),

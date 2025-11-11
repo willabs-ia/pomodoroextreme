@@ -5,6 +5,7 @@ import TimerPage from './pages/TimerPage';
 import BlockPage from './pages/BlockPage';
 import SettingsPage from './pages/SettingsPage';
 import OnboardingPage from './pages/OnboardingPage';
+import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import './styles/App.css';
 
 function App() {
@@ -42,27 +43,32 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        {!isOnboardingComplete ? (
-          <>
-            <Route
-              path="/onboarding"
-              element={<OnboardingPage onComplete={handleOnboardingComplete} />}
-            />
-            <Route path="*" element={<Navigate to="/onboarding" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/timer" element={<TimerPage />} />
-            <Route path="/block" element={<BlockPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
-      </Routes>
-    </Router>
+    <>
+      {/* AudioPlayer - Global audio manager */}
+      <AudioPlayer />
+
+      <Router>
+        <Routes>
+          {!isOnboardingComplete ? (
+            <>
+              <Route
+                path="/onboarding"
+                element={<OnboardingPage onComplete={handleOnboardingComplete} />}
+              />
+              <Route path="*" element={<Navigate to="/onboarding" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/timer" element={<TimerPage />} />
+              <Route path="/block" element={<BlockPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
+        </Routes>
+      </Router>
+    </>
   );
 }
 

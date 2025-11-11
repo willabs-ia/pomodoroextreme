@@ -1,0 +1,34 @@
+# Icons Placeholder
+
+Este diretório deve conter os ícones do Pomodoro Extreme.
+
+## Arquivos Necessários:
+
+### App Icons:
+- icon.png (512x512) - Ícone principal do app
+- icon.icns - Ícone macOS
+- icon.ico - Ícone Windows
+- tray-icon.png (16x16, 32x32) - Ícone da bandeja do sistema
+- tray-icon-active.png (16x16, 32x32) - Ícone da bandeja quando timer ativo
+
+### Project Icons:
+- 30 ícones flat para projetos (work, study, creative, etc.)
+
+### Achievement Icons:
+- 12 badges para conquistas
+
+## Como Obter:
+
+Consulte o arquivo `assets/README.md` para instruções detalhadas sobre
+onde baixar ícones gratuitos de fontes como:
+- Flaticon
+- Icons8
+- Font Awesome
+- Material Icons
+
+## Gerando Ícones de Plataforma:
+
+```bash
+npm install -g electron-icon-builder
+electron-icon-builder --input=./icon.png --output=./assets/icons
+```

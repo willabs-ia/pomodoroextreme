@@ -70,12 +70,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getReputation: () => ipcRenderer.invoke('achievements:get-reputation'),
   unlockAchievement: (id) => ipcRenderer.invoke('achievements:unlock', id),
 
-  // Audio
+  // Audio - Send commands to main
   playSound: (soundId, volume) => ipcRenderer.send('audio:play', soundId, volume),
   stopSound: (soundId) => ipcRenderer.send('audio:stop', soundId),
   setVolume: (soundId, volume) => ipcRenderer.send('audio:set-volume', soundId, volume),
   playMusic: (source, options) => ipcRenderer.send('audio:play-music', source, options),
   stopMusic: () => ipcRenderer.send('audio:stop-music'),
+
+  // Audio - Receive events from main
+  onAudioPlaySound: (callback) => ipcRenderer.on('audio:play-sound', (_, data) => callback(data)),
+  onAudioStopSound: (callback) => ipcRenderer.on('audio:stop-sound', (_, data) => callback(data)),
+  onAudioPlayMusic: (callback) => ipcRenderer.on('audio:play-music', (_, data) => callback(data)),
+  onAudioStopMusic: (callback) => ipcRenderer.on('audio:stop-music', () => callback()),
+  onAudioPauseMusic: (callback) => ipcRenderer.on('audio:pause-music', () => callback()),
+  onAudioResumeMusic: (callback) => ipcRenderer.on('audio:resume-music', () => callback()),
+  onAudioSetVolume: (callback) => ipcRenderer.on('audio:set-volume', (_, data) => callback(data)),
 
   // Media control (Spotify, YouTube, etc)
   pauseMedia: () => ipcRenderer.send('media:pause-all'),

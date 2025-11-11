@@ -1,84 +1,33 @@
-const { ipcMain, dialog, screen, shell } = require('electron');
+const { ipcMain, dialog, screen } = require('electron');
 const path = require('path');
 
-// Import managers (will be implemented)
-// const { AudioManager } = require('../managers/AudioManager');
-// const { MediaController } = require('../managers/MediaController');
-// const { InactivityDetector } = require('../managers/InactivityDetector');
-// const { Database } = require('../../data/Database');
-
 let windowManager = null;
-// let audioManager = null;
-// let mediaController = null;
-// let inactivityDetector = null;
-// let database = null;
+let appController = null;
 
-function setupIPCHandlers(wm) {
+function setupIPCHandlers(wm, ac) {
   windowManager = wm;
+  appController = ac;
 
-  // Initialize managers
-  // audioManager = new AudioManager();
-  // mediaController = new MediaController();
-  // inactivityDetector = new InactivityDetector();
-  // database = new Database();
-
-  // Window management handlers
   setupWindowHandlers();
-
-  // Timer handlers
   setupTimerHandlers();
-
-  // Project handlers
   setupProjectHandlers();
-
-  // Session handlers
   setupSessionHandlers();
-
-  // Configuration handlers
   setupConfigHandlers();
-
-  // Statistics handlers
   setupStatsHandlers();
-
-  // Achievement handlers
   setupAchievementHandlers();
-
-  // Audio handlers
   setupAudioHandlers();
-
-  // Media control handlers
   setupMediaHandlers();
-
-  // Inactivity handlers
   setupInactivityHandlers();
-
-  // Notification handlers
   setupNotificationHandlers();
-
-  // System handlers
   setupSystemHandlers();
-
-  // File system handlers
   setupFileSystemHandlers();
-
-  // Phrases handlers
   setupPhrasesHandlers();
-
-  // Other handlers
   setupMiscHandlers();
 }
 
 function setupWindowHandlers() {
   ipcMain.on('window:minimize', () => {
     windowManager.minimizeGadget();
-  });
-
-  ipcMain.on('window:maximize', () => {
-    // Toggle maximize/restore for gadget (if needed)
-  });
-
-  ipcMain.on('window:close', () => {
-    // Handle close request (maybe show confirmation dialog)
   });
 
   ipcMain.on('window:always-on-top', (event, flag) => {
@@ -106,203 +55,250 @@ function setupWindowHandlers() {
 
 function setupTimerHandlers() {
   ipcMain.on('timer:start', (event, config) => {
-    // Timer logic will be handled in TimerEngine
-    // This just broadcasts to windows
-    console.log('Timer started:', config);
+    try {
+      const session = appController.sessionManager.startSession(config.projectId);
+      event.reply('timer:started', { success: true, session });
+    } catch (error) {
+      event.reply('timer:error', { error: error.message });
+    }
   });
 
   ipcMain.on('timer:pause', () => {
-    console.log('Timer paused');
+    appController.sessionManager.pause();
+  });
+
+  ipcMain.on('timer:resume', () => {
+    appController.sessionManager.resume();
   });
 
   ipcMain.on('timer:stop', () => {
-    console.log('Timer stopped');
+    appController.sessionManager.stop();
+  });
+
+  ipcMain.handle('timer:get-state', () => {
+    return appController.sessionManager.getState();
+  });
+
+  ipcMain.handle('timer:skip-break', async (event, reason) => {
+    try {
+      // This would need UI callbacks from renderer
+      const result = await appController.sessionManager.requestSkipBreak({
+        onMessage: async (message) => {
+          // Send to renderer and wait for response
+          return new Promise((resolve) => {
+            windowManager.gadgetWindow.webContents.send('skip:show-message', {
+              message
+            });
+
+            ipcMain.once('skip:message-response', (e, confirmed) => {
+              resolve(confirmed);
+            });
+          });
+        },
+        onJustification: async (prompt) => {
+          return new Promise((resolve) => {
+            windowManager.gadgetWindow.webContents.send('skip:request-justification', {
+              prompt
+            });
+
+            ipcMain.once('skip:justification-response', (e, justification) => {
+              resolve(justification);
+            });
+          });
+        },
+        onWarning: async (warning) => {
+          windowManager.gadgetWindow.webContents.send('skip:warning', warning);
+        }
+      });
+
+      return result;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   });
 }
 
 function setupProjectHandlers() {
   ipcMain.handle('projects:get-all', async () => {
-    // TODO: Implement database query
-    return [
-      {
-        id: '1',
-        name: 'Project 1',
-        color: '#FF6B6B',
-        icon: '🚀',
-        createdAt: new Date().toISOString()
-      }
-    ];
+    return appController.dataService.projects.getAll();
   });
 
   ipcMain.handle('projects:create', async (event, project) => {
-    // TODO: Implement database insert
-    console.log('Creating project:', project);
-    return { id: Date.now().toString(), ...project };
+    return appController.dataService.projects.create(project);
   });
 
-  ipcMain.handle('projects:update', async (event, id, project) => {
-    // TODO: Implement database update
-    console.log('Updating project:', id, project);
-    return { id, ...project };
+  ipcMain.handle('projects:update', async (event, id, updates) => {
+    return appController.dataService.projects.update(id, updates);
   });
 
   ipcMain.handle('projects:delete', async (event, id) => {
-    // TODO: Implement database delete
-    console.log('Deleting project:', id);
-    return { success: true };
+    return appController.dataService.projects.delete(id);
   });
 
   ipcMain.handle('projects:get-active', async () => {
-    // TODO: Get active project from session
-    return null;
+    const state = appController.sessionManager.getState();
+    return state.currentProject || null;
+  });
+
+  ipcMain.handle('projects:get-stats', async (event, id, period) => {
+    return appController.dataService.projects.getStats(id, period);
   });
 }
 
 function setupSessionHandlers() {
   ipcMain.handle('session:get-current', async () => {
-    // TODO: Get current session from database
-    return null;
+    return appController.dataService.sessions.getCurrent();
   });
 
   ipcMain.handle('session:recover', async () => {
-    // TODO: Recover interrupted session
+    const session = appController.dataService.sessions.getCurrent();
+    if (session) {
+      appController.dataService.sessions.markAsRecovered(session.id);
+      return session;
+    }
     return null;
   });
 
   ipcMain.handle('session:discard', async () => {
-    // TODO: Discard interrupted session
+    const session = appController.dataService.sessions.getCurrent();
+    if (session) {
+      appController.dataService.sessions.delete(session.id);
+    }
     return { success: true };
+  });
+
+  ipcMain.on('session:end', () => {
+    appController.sessionManager.endSession();
   });
 }
 
 function setupConfigHandlers() {
   ipcMain.handle('config:get', async (event, projectId) => {
-    // TODO: Get config from database
-    return {
-      focusDuration: 25,
-      shortBreakDuration: 5,
-      longBreakDuration: 15,
-      pomodorosUntilLongBreak: 4,
-      blockLevel: 'medium',
-      theme: 'dark',
-      sounds: {
-        enabled: true,
-        volume: 0.5
-      }
-    };
+    return appController.dataService.configs.getByProject(projectId);
   });
 
   ipcMain.handle('config:update', async (event, projectId, config) => {
-    // TODO: Update config in database
-    console.log('Updating config:', projectId, config);
-    return { success: true };
+    return appController.dataService.configs.update(projectId, config);
+  });
+
+  ipcMain.handle('config:get-app-settings', async () => {
+    return appController.dataService.configs.getAllAppSettings();
+  });
+
+  ipcMain.on('config:set-app-setting', (event, key, value) => {
+    appController.dataService.configs.setAppSetting(key, value);
   });
 }
 
 function setupStatsHandlers() {
   ipcMain.handle('stats:get', async (event, projectId, period) => {
-    // TODO: Get stats from database
-    return {
-      totalPomodoros: 0,
-      totalFocusTime: 0,
-      totalBreakTime: 0,
-      streak: 0
-    };
+    return appController.dataService.stats.getByProject(projectId, period);
+  });
+
+  ipcMain.handle('stats:get-aggregated', async (event, projectId, period) => {
+    return appController.dataService.stats.getAggregated(projectId, period);
   });
 
   ipcMain.handle('stats:dashboard', async () => {
-    // TODO: Get dashboard data
-    return {
-      today: { pomodoros: 0, focusTime: 0 },
-      week: { pomodoros: 0, focusTime: 0 },
-      month: { pomodoros: 0, focusTime: 0 }
-    };
+    return appController.dataService.stats.getAllProjectsStats('week');
+  });
+
+  ipcMain.handle('stats:get-streak', async () => {
+    return appController.dataService.stats.getStreak();
   });
 
   ipcMain.handle('stats:export', async (event, format, period) => {
-    // TODO: Export stats to PDF/CSV
-    console.log('Exporting stats:', format, period);
-    return { success: true, path: '/path/to/export.pdf' };
+    // TODO: Implement export functionality
+    return { success: false, message: 'Not implemented yet' };
   });
 }
 
 function setupAchievementHandlers() {
   ipcMain.handle('achievements:get-all', async () => {
-    // TODO: Get achievements from database
-    return [];
+    return appController.dataService.achievements.getAll();
+  });
+
+  ipcMain.handle('achievements:get-unlocked', async () => {
+    return appController.dataService.achievements.getUnlocked();
   });
 
   ipcMain.handle('achievements:get-reputation', async () => {
-    // TODO: Calculate reputation
-    return {
-      discipline: 80,
-      consistency: 60,
-      level: 'Focado'
-    };
-  });
-
-  ipcMain.handle('achievements:unlock', async (event, id) => {
-    // TODO: Unlock achievement
-    console.log('Unlocking achievement:', id);
-    return { success: true };
+    return appController.dataService.achievements.getReputation();
   });
 }
 
 function setupAudioHandlers() {
   ipcMain.on('audio:play', (event, soundId, volume) => {
-    // TODO: Play sound
-    console.log('Playing sound:', soundId, volume);
+    appController.audioManager.playSound(soundId, volume);
   });
 
   ipcMain.on('audio:stop', (event, soundId) => {
-    // TODO: Stop sound
-    console.log('Stopping sound:', soundId);
+    appController.audioManager.stopSound(soundId);
   });
 
   ipcMain.on('audio:set-volume', (event, soundId, volume) => {
-    // TODO: Set volume
-    console.log('Setting volume:', soundId, volume);
+    appController.audioManager.setVolume(soundId, volume);
   });
 
   ipcMain.on('audio:play-music', (event, source, options) => {
-    // TODO: Play music
-    console.log('Playing music:', source, options);
+    appController.audioManager.playMusic(source, options);
   });
 
   ipcMain.on('audio:stop-music', () => {
-    // TODO: Stop music
-    console.log('Stopping music');
+    appController.audioManager.stopMusic();
+  });
+
+  ipcMain.handle('audio:get-music-state', () => {
+    return appController.audioManager.getMusicState();
   });
 }
 
 function setupMediaHandlers() {
-  ipcMain.on('media:pause-all', () => {
-    // TODO: Pause all media
-    console.log('Pausing all media');
+  ipcMain.on('media:pause-all', async () => {
+    await appController.mediaController.pauseAll();
   });
 
-  ipcMain.on('media:resume-all', () => {
-    // TODO: Resume all media
-    console.log('Resuming all media');
+  ipcMain.on('media:resume-all', async () => {
+    await appController.mediaController.resumeAll();
+  });
+
+  ipcMain.handle('media:get-paused', () => {
+    return appController.mediaController.getPausedMedia();
   });
 }
 
 function setupInactivityHandlers() {
   ipcMain.on('inactivity:start', (event, timeout) => {
-    // TODO: Start inactivity detection
-    console.log('Starting inactivity detection:', timeout);
+    appController.inactivityDetector.start(timeout, (data) => {
+      appController.sessionManager.emit('inactivity:detected', data);
+    });
   });
 
   ipcMain.on('inactivity:stop', () => {
-    // TODO: Stop inactivity detection
-    console.log('Stopping inactivity detection');
+    appController.inactivityDetector.stop();
+  });
+
+  ipcMain.handle('inactivity:get-state', () => {
+    return appController.inactivityDetector.getState();
+  });
+
+  ipcMain.on('activity:record', () => {
+    appController.sessionManager.recordActivity();
+    appController.inactivityDetector.recordActivity();
   });
 }
 
 function setupNotificationHandlers() {
   ipcMain.on('notification:show', (event, options) => {
-    // TODO: Show notification
-    console.log('Showing notification:', options);
+    appController.notificationManager.show(options);
+  });
+
+  ipcMain.on('notification:set-enabled', (event, enabled) => {
+    appController.notificationManager.setEnabled(enabled);
+  });
+
+  ipcMain.on('notification:set-sound-enabled', (event, enabled) => {
+    appController.notificationManager.setSoundEnabled(enabled);
   });
 }
 
@@ -311,7 +307,8 @@ function setupSystemHandlers() {
     return {
       platform: process.platform,
       arch: process.arch,
-      version: process.version
+      version: process.version,
+      electron: process.versions.electron
     };
   });
 
@@ -324,7 +321,7 @@ function setupSystemHandlers() {
   });
 
   ipcMain.handle('weather:get', async () => {
-    // TODO: Get weather from API
+    // TODO: Implement weather API
     return {
       temp: 22,
       condition: 'sunny',
@@ -346,79 +343,77 @@ function setupFileSystemHandlers() {
     });
     return result.filePaths[0] || null;
   });
-
-  ipcMain.handle('fs:save-file', async (event, filePath, data) => {
-    // TODO: Save file
-    console.log('Saving file:', filePath);
-    return { success: true };
-  });
 }
 
 function setupPhrasesHandlers() {
   ipcMain.handle('phrases:get', async (event, category) => {
-    // TODO: Get random phrase from database
-    return 'Placeholder phrase';
+    return appController.dataService.phrases.getRandom(category, 1);
   });
 
   ipcMain.handle('phrases:get-multiple', async (event, category, count) => {
-    // TODO: Get multiple phrases
-    return ['Phrase 1', 'Phrase 2', 'Phrase 3'];
+    return appController.dataService.phrases.getRandom(category, count);
   });
 }
 
 function setupMiscHandlers() {
   ipcMain.on('onboarding:complete', () => {
-    // TODO: Mark onboarding as complete
-    console.log('Onboarding completed');
+    appController.dataService.configs.setAppSetting('onboarding_complete', '1');
   });
 
   ipcMain.handle('onboarding:is-complete', async () => {
-    // TODO: Check if onboarding is complete
-    return false;
+    const value = appController.dataService.configs.getAppSetting('onboarding_complete');
+    return value === '1';
   });
 
   ipcMain.on('telemetry:send', (event, eventName, data) => {
-    // TODO: Send telemetry if consent given
-    console.log('Telemetry event:', eventName, data);
+    const consent = appController.dataService.configs.getAppSetting('telemetry_consent');
+    if (consent === '1') {
+      console.log('Telemetry event:', eventName, data);
+      // TODO: Send to analytics service
+    }
   });
 
   ipcMain.on('telemetry:set-consent', (event, consent) => {
-    // TODO: Save telemetry consent
-    console.log('Telemetry consent:', consent);
+    appController.dataService.configs.setAppSetting('telemetry_consent', consent ? '1' : '0');
   });
 
   ipcMain.handle('update:check', async () => {
-    // TODO: Check for updates
-    return { available: false, version: '1.0.0' };
+    return appController.updateManager.checkForUpdates();
   });
 
   ipcMain.handle('update:get-changelog', async () => {
-    // TODO: Get changelog
-    return 'Changelog content';
+    return appController.updateManager.getChangelog();
   });
 
   ipcMain.on('dnd:set', (event, enabled) => {
-    // TODO: Set Do Not Disturb mode
+    // TODO: Implement Do Not Disturb mode for Windows
     console.log('DND mode:', enabled);
   });
 
   ipcMain.on('shortcut:register', (event, shortcut, action) => {
-    // TODO: Register global shortcut
-    console.log('Registering shortcut:', shortcut, action);
+    appController.shortcutManager.register(shortcut, action, (triggeredAction) => {
+      if (windowManager.gadgetWindow) {
+        windowManager.gadgetWindow.webContents.send('shortcut:triggered', {
+          action: triggeredAction
+        });
+      }
+    });
   });
 
   ipcMain.on('shortcut:unregister', (event, shortcut) => {
-    // TODO: Unregister global shortcut
-    console.log('Unregistering shortcut:', shortcut);
+    appController.shortcutManager.unregister(shortcut);
+  });
+
+  ipcMain.handle('shortcut:get-all', () => {
+    return appController.shortcutManager.getAll();
   });
 
   ipcMain.on('i18n:change', (event, lang) => {
-    // TODO: Change language
-    console.log('Changing language:', lang);
+    appController.dataService.configs.setAppSetting('locale', lang);
   });
 
   ipcMain.handle('i18n:get', async (event, key) => {
-    // TODO: Get translation
+    // TODO: Implement actual i18n
     return key;
   });
 }

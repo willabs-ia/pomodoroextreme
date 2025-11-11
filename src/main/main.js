@@ -2,11 +2,13 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { WindowManager } = require('./managers/WindowManager');
 const { TrayManager } = require('./managers/TrayManager');
+const { AppController } = require('./AppController');
 const { setupIPCHandlers } = require('./ipc/handlers');
 
 // Keep a global reference of the window object
 let windowManager = null;
 let trayManager = null;
+let appController = null;
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -20,8 +22,11 @@ function createApp() {
   // Initialize Tray Icon
   trayManager = new TrayManager(windowManager);
 
+  // Initialize App Controller (this initializes all managers and services)
+  appController = new AppController(windowManager, trayManager);
+
   // Setup IPC handlers
-  setupIPCHandlers(windowManager);
+  setupIPCHandlers(windowManager, appController);
 }
 
 // This method will be called when Electron has finished
@@ -64,6 +69,9 @@ if (!gotTheLock) {
 // Handle app termination
 app.on('before-quit', () => {
   // Cleanup and save state
+  if (appController) {
+    appController.cleanup();
+  }
   if (windowManager) {
     windowManager.cleanup();
   }

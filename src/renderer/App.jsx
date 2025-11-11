@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import HomePage from './pages/HomePage';
 import TimerPage from './pages/TimerPage';
 import BlockPage from './pages/BlockPage';
@@ -9,6 +10,7 @@ import SettingsPage from './pages/SettingsPage';
 import OnboardingPage from './pages/OnboardingPage';
 import Layout from './components/Layout/Layout';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import './styles/App.css';
 
 function App() {
@@ -46,9 +48,36 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       {/* AudioPlayer - Global audio manager */}
       <AudioPlayer />
+
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1A202C',
+            color: '#fff',
+            padding: '16px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+          },
+          success: {
+            iconTheme: {
+              primary: '#48BB78',
+              secondary: '#fff'
+            }
+          },
+          error: {
+            iconTheme: {
+              primary: '#F56565',
+              secondary: '#fff'
+            }
+          }
+        }}
+      />
 
       <Router>
         <Routes>
@@ -75,7 +104,7 @@ function App() {
           )}
         </Routes>
       </Router>
-    </>
+    </ErrorBoundary>
   );
 }
 

@@ -29,10 +29,12 @@ import {
   AlertIcon
 } from '@chakra-ui/react';
 import useSettings from '../hooks/useSettings';
+import useToast from '../hooks/useToast';
 
 function SettingsPage() {
   const { settings, loading, updateField, resetToDefaults } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
+  const toast = useToast();
 
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
@@ -41,10 +43,10 @@ function SettingsPage() {
     try {
       setIsSaving(true);
       await updateField(field, value);
-      // TODO: Show success toast
+      toast.success('Configuração salva com sucesso!', { duration: 2000 });
     } catch (err) {
       console.error('Error updating setting:', err);
-      // TODO: Show error toast
+      toast.error('Erro ao salvar configuração. Tente novamente.');
     } finally {
       setIsSaving(false);
     }
@@ -54,9 +56,10 @@ function SettingsPage() {
     if (window.confirm('Tem certeza que deseja restaurar as configurações padrão?')) {
       try {
         await resetToDefaults();
-        // TODO: Show success toast
+        toast.success('Configurações restauradas para os valores padrão!');
       } catch (err) {
         console.error('Error resetting settings:', err);
+        toast.error('Erro ao restaurar configurações.');
       }
     }
   };

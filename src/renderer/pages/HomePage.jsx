@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   VStack,
@@ -19,11 +20,14 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import { AddIcon, SettingsIcon } from '@chakra-ui/icons';
+import useToast from '../hooks/useToast';
 
 function HomePage() {
   const [projects, setProjects] = useState([]);
   const [newProjectName, setNewProjectName] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     loadProjects();
@@ -35,11 +39,15 @@ function HomePage() {
       setProjects(projectsList);
     } catch (error) {
       console.error('Error loading projects:', error);
+      toast.error('Erro ao carregar projetos. Tente novamente.');
     }
   };
 
   const handleCreateProject = async () => {
-    if (!newProjectName.trim()) return;
+    if (!newProjectName.trim()) {
+      toast.warning('Por favor, digite um nome para o projeto');
+      return;
+    }
 
     try {
       await window.electronAPI.createProject({
@@ -49,21 +57,24 @@ function HomePage() {
         createdAt: new Date().toISOString()
       });
 
+      toast.success(`Projeto "${newProjectName}" criado com sucesso!`);
       setNewProjectName('');
       onClose();
       loadProjects();
     } catch (error) {
       console.error('Error creating project:', error);
+      toast.error('Erro ao criar projeto. Tente novamente.');
     }
   };
 
   const handleStartSession = async (project) => {
     try {
       await window.electronAPI.startTimer({ projectId: project.id });
-      // TODO: Navegar para TimerPage ou abrir janela gadget
-      console.log('Sessão iniciada para projeto:', project.name);
+      toast.pomodoroStarted(project.name);
+      navigate('/timer');
     } catch (error) {
       console.error('Error starting session:', error);
+      toast.error('Erro ao iniciar sessão. Tente novamente.');
     }
   };
 
@@ -146,16 +157,23 @@ function HomePage() {
           <Button
             leftIcon={<SettingsIcon />}
             variant="ghost"
-            onClick={() => console.log('Open settings')}
+            onClick={() => navigate('/settings')}
           >
             Configurações
           </Button>
           <Button
             leftIcon={<Text>📊</Text>}
             variant="ghost"
-            onClick={() => console.log('Open stats')}
+            onClick={() => navigate('/stats')}
           >
             Estatísticas
+          </Button>
+          <Button
+            leftIcon={<Text>🏆</Text>}
+            variant="ghost"
+            onClick={() => navigate('/achievements')}
+          >
+            Conquistas
           </Button>
         </HStack>
       </VStack>

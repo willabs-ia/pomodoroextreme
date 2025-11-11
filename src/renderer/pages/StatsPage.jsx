@@ -42,6 +42,7 @@ import {
 } from 'recharts';
 import useStats from '../hooks/useStats';
 import useProjects from '../hooks/useProjects';
+import useToast from '../hooks/useToast';
 
 function StatsPage() {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -49,17 +50,22 @@ function StatsPage() {
 
   const { stats, dashboard, loading, exportStats } = useStats(selectedProject, period);
   const { projects } = useProjects();
+  const toast = useToast();
 
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const cardBg = useColorModeValue('white', 'gray.800');
 
   const handleExport = async (format) => {
     try {
-      await exportStats(format, period);
-      // TODO: Toast success
-      console.log(`Stats exported as ${format}`);
+      const result = await exportStats(format, period);
+      if (result && result.path) {
+        toast.success(`Estatísticas exportadas com sucesso! Arquivo salvo em: ${result.path}`);
+      } else {
+        toast.success(`Estatísticas exportadas como ${format.toUpperCase()}`);
+      }
     } catch (err) {
       console.error('Export failed:', err);
+      toast.error('Erro ao exportar estatísticas. Tente novamente.');
     }
   };
 

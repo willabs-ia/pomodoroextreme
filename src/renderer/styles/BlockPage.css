@@ -1,0 +1,118 @@
+.block-page {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.block-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  max-width: 800px;
+  padding: var(--spacing-xl);
+  text-align: center;
+  animation: fadeIn 1s ease;
+}
+
+.block-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.block-phrase {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.block-timer {
+  font-size: 8rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: -4px;
+  background: linear-gradient(135deg, #4ade80, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: var(--spacing-xl) 0;
+}
+
+.block-progress {
+  width: 600px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.block-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22d3ee);
+  transition: width 1s linear;
+}
+
+.activity-suggestions {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xl);
+  min-width: 400px;
+}
+
+.activity-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-secondary);
+}
+
+.activity-current {
+  font-size: 2rem;
+  font-weight: 600;
+  animation: slideUp 0.5s ease;
+}
+
+.block-footer {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.block-footer-text {
+  font-size: 1.125rem;
+  color: var(--color-text-muted);
+}
+
+.music-control {
+  position: fixed;
+  bottom: var(--spacing-xl);
+  right: var(--spacing-xl);
+}
+
+.music-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.music-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}

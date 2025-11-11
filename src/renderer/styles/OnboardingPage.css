@@ -1,0 +1,228 @@
+.onboarding-page {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
+  padding: var(--spacing-xl);
+}
+
+.onboarding-container {
+  max-width: 800px;
+  width: 100%;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.5s ease;
+}
+
+.onboarding-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.onboarding-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.onboarding-description {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+}
+
+.onboarding-content {
+  min-height: 300px;
+  margin-bottom: var(--spacing-xl);
+}
+
+.welcome-icon {
+  font-size: 6rem;
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.welcome-text {
+  font-size: 1.25rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.feature-item h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.feature-item p {
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.level-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.level-card {
+  padding: var(--spacing-lg);
+  background: var(--color-bg-tertiary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  position: relative;
+}
+
+.level-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-primary);
+}
+
+.level-card.recommended {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.recommended-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.level-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.level-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.privacy-section {
+  display: flex;
+  justify-content: center;
+}
+
+.privacy-card {
+  max-width: 600px;
+  padding: var(--spacing-xl);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+}
+
+.privacy-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.privacy-card p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-lg);
+}
+
+.consent-option {
+  margin: var(--spacing-lg) 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  cursor: pointer;
+}
+
+.checkbox-label input[type='checkbox'] {
+  margin-top: 4px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.privacy-note {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.onboarding-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-lg);
+}
+
+.step-indicators {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.step-indicator {
+  width: 40px;
+  height: 4px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
+}
+
+.step-indicator.active {
+  background: var(--color-primary);
+}
+
+.step-indicator.completed {
+  background: var(--color-success);
+}
+
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.onboarding-actions button {
+  flex: 1;
+}

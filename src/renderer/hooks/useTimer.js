@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import useToast from './useToast';
 
 function useTimer() {
+  const toast = useToast();
   const [timerState, setTimerState] = useState({
     isRunning: false,
     isPaused: false,
@@ -34,6 +36,9 @@ function useTimer() {
         currentProject: data.project,
         currentSession: data.session
       }));
+      // Show toast notification
+      const projectName = data.project?.name;
+      toast.pomodoroStarted(projectName);
     };
 
     const handlePomodoroCompleted = (data) => {
@@ -41,6 +46,8 @@ function useTimer() {
         ...prev,
         pomodorosCompleted: data.pomodorosCompleted || prev.pomodorosCompleted + 1
       }));
+      // Show toast notification
+      toast.pomodoroCompleted();
     };
 
     const handleBreakStarted = (data) => {
@@ -51,10 +58,14 @@ function useTimer() {
         type: data.type,
         plannedDuration: data.duration
       }));
+      // Show toast notification
+      const duration = Math.floor(data.duration / 60); // Convert seconds to minutes
+      toast.breakStarted(duration);
     };
 
     const handleBreakCompleted = () => {
       // Break completed, will transition to next pomodoro
+      toast.breakCompleted();
     };
 
     const handlePaused = () => {

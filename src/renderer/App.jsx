@@ -3,8 +3,11 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import HomePage from './pages/HomePage';
 import TimerPage from './pages/TimerPage';
 import BlockPage from './pages/BlockPage';
+import StatsPage from './pages/StatsPage';
+import AchievementsPage from './pages/AchievementsPage';
 import SettingsPage from './pages/SettingsPage';
 import OnboardingPage from './pages/OnboardingPage';
+import Layout from './components/Layout/Layout';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import './styles/App.css';
 
@@ -59,10 +62,14 @@ function App() {
             </>
           ) : (
             <>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<Layout />}>
+                <Route index element={<HomePage />} />
+                <Route path="stats" element={<StatsPage />} />
+                <Route path="achievements" element={<AchievementsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
               <Route path="/timer" element={<TimerPage />} />
               <Route path="/block" element={<BlockPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}

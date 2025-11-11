@@ -25,6 +25,21 @@ import {
   Td
 } from '@chakra-ui/react';
 import { DownloadIcon } from '@chakra-ui/icons';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import useStats from '../hooks/useStats';
 import useProjects from '../hooks/useProjects';
 
@@ -161,6 +176,125 @@ function StatsPage() {
             </Stat>
           </Box>
         </SimpleGrid>
+
+        {/* Gráficos */}
+        {currentStats && (
+          <>
+            <Divider />
+
+            <Heading size="md">📈 Evolução</Heading>
+
+            {/* Gráfico de Linha - Pomodoros por Dia */}
+            {currentStats.dailyBreakdown && Object.keys(currentStats.dailyBreakdown).length > 0 && (
+              <Box bg={cardBg} p={6} borderRadius="xl" shadow="md">
+                <Heading size="sm" mb={4}>
+                  Pomodoros por Dia
+                </Heading>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart
+                    data={formatDailyBreakdown(currentStats.dailyBreakdown)}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                    <XAxis dataKey="date" stroke="#718096" />
+                    <YAxis stroke="#718096" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: cardBg,
+                        border: 'none',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="pomodoros"
+                      name="Pomodoros"
+                      stroke="#E53E3E"
+                      strokeWidth={2}
+                      dot={{ fill: '#E53E3E', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="focusTime"
+                      name="Tempo Focado (h)"
+                      stroke="#3182CE"
+                      strokeWidth={2}
+                      dot={{ fill: '#3182CE', r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+            )}
+
+            {/* Gráfico de Barras - Tendência Semanal */}
+            {currentStats.weeklyTrend && currentStats.weeklyTrend.length > 0 && (
+              <Box bg={cardBg} p={6} borderRadius="xl" shadow="md">
+                <Heading size="sm" mb={4}>
+                  Tendência Semanal
+                </Heading>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={currentStats.weeklyTrend}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                    <XAxis dataKey="week" stroke="#718096" />
+                    <YAxis stroke="#718096" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: cardBg,
+                        border: 'none',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="pomodoros" name="Pomodoros" fill="#E53E3E" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="sessions" name="Sessões" fill="#38A169" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            )}
+
+            {/* Gráfico de Pizza - Distribuição por Projeto */}
+            {currentStats.topProjects && currentStats.topProjects.length > 0 && !selectedProject && (
+              <Box bg={cardBg} p={6} borderRadius="xl" shadow="md">
+                <Heading size="sm" mb={4}>
+                  Distribuição de Tempo por Projeto
+                </Heading>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={currentStats.topProjects.slice(0, 5)}
+                      dataKey="pomodoros"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label={renderPieLabel}
+                    >
+                      {currentStats.topProjects.slice(0, 5).map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: cardBg,
+                        border: 'none',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Box>
+            )}
+          </>
+        )}
 
         {/* Dashboard Semanal/Mensal */}
         {!selectedProject && dashboard && (
@@ -373,6 +507,9 @@ function StatsPage() {
   );
 }
 
+// Chart colors
+const PIE_COLORS = ['#E53E3E', '#3182CE', '#38A169', '#D69E2E', '#805AD5'];
+
 // Helper functions
 function formatHours(minutes) {
   const hours = Math.floor(minutes / 60);
@@ -407,5 +544,27 @@ function calculateProductivity(stats) {
   if (!stats || stats.totalPomodoros === 0) return 0;
   return Math.round((stats.completedPomodoros / stats.totalPomodoros) * 100);
 }
+
+// Format daily breakdown for line chart
+function formatDailyBreakdown(dailyBreakdown) {
+  return Object.entries(dailyBreakdown)
+    .map(([date, data]) => ({
+      date: formatChartDate(date),
+      pomodoros: data.pomodoros || 0,
+      focusTime: ((data.focusTime || 0) / 60).toFixed(1) // Convert to hours
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+// Format date for chart x-axis
+function formatChartDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+
+// Custom label for pie chart
+const renderPieLabel = (entry) => {
+  return `${entry.name}: ${entry.pomodoros}`;
+};
 
 export default StatsPage;

@@ -1,0 +1,32 @@
+
+# Converter SVG para ICO/ICNS
+
+## Para Windows (.ico):
+
+1. Instale o ImageMagick: https://imagemagick.org/script/download.php
+
+2. Execute no terminal:
+   convert icon.svg -define icon:auto-resize=16,32,48,256 icon.ico
+
+## Para macOS (.icns):
+
+1. Use a ferramenta png2icns ou iconutil (nativo do macOS)
+
+2. Ou instale: npm install -g png2icons
+
+3. Execute:
+   png2icons icon-512.svg icon.icns
+
+## Método Mais Fácil:
+
+Use electron-icon-maker (recomendado):
+
+npm install -g electron-icon-maker
+electron-icon-maker --input=icon-512.svg --output=.
+
+Isso gera automaticamente .ico e .icns!
+
+## Online (Sem Instalação):
+
+1. https://convertico.com - Upload SVG, baixa ICO
+2. https://cloudconvert.com/svg-to-icns - Para ICNS

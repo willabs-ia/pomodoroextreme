@@ -56,6 +56,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   recoverSession: () => ipcRenderer.invoke('session:recover'),
   discardSession: () => ipcRenderer.invoke('session:discard'),
 
+  // Session recovery (interrupted sessions)
+  checkSessionRecovery: () => ipcRenderer.invoke('session:check-recovery'),
+  restoreSession: (sessionId) => ipcRenderer.invoke('session:restore', sessionId),
+  discardRecovery: () => ipcRenderer.invoke('session:discard-recovery'),
+
   // Configuration
   getConfig: (projectId) => ipcRenderer.invoke('config:get', projectId),
   updateConfig: (projectId, config) => ipcRenderer.invoke('config:update', projectId, config),

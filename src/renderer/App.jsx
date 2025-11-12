@@ -11,6 +11,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import Layout from './components/Layout/Layout';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import SessionRecovery from './components/SessionRecovery/SessionRecovery';
 import './styles/App.css';
 
 function App() {
@@ -51,6 +52,9 @@ function App() {
     <ErrorBoundary>
       {/* AudioPlayer - Global audio manager */}
       <AudioPlayer />
+
+      {/* Session Recovery - Recupera sessões interrompidas */}
+      {isOnboardingComplete && <SessionRecovery />}
 
       {/* Toast Notifications */}
       <Toaster

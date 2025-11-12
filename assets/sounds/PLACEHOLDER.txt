@@ -1,0 +1,30 @@
+# Audio Files Placeholder
+
+Este diretório deve conter os arquivos de áudio do Pomodoro Extreme.
+
+## Arquivos Necessários:
+
+1. tick.mp3
+2. tack.mp3
+3. pomodoro-start.mp3
+4. pomodoro-complete.mp3
+5. break-start.mp3
+6. break-complete.mp3
+7. notification.mp3
+8. achievement.mp3
+9. warning.mp3
+10. break-music.mp3 (opcional)
+
+## Como Obter:
+
+Consulte o arquivo `assets/README.md` para instruções detalhadas sobre
+onde baixar sons gratuitos (CC0) de fontes como:
+- Freesound.org
+- YouTube Audio Library
+- Zapsplat
+- Mixkit
+
+## Nota:
+
+O aplicativo funcionará sem os arquivos de áudio, mas não emitirá sons.
+Para melhor experiência, adicione os arquivos MP3 aqui.

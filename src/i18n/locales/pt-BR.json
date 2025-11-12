@@ -1,0 +1,66 @@
+{
+  "app": {
+    "name": "Pomodoro Extreme",
+    "tagline": "O aplicativo que te FORÇA a descansar!"
+  },
+  "common": {
+    "start": "Iniciar",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "stop": "Parar",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "settings": "Configurações",
+    "back": "Voltar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "confirm": "Confirmar"
+  },
+  "timer": {
+    "focus": "Foco",
+    "shortBreak": "Pausa Curta",
+    "longBreak": "Pausa Longa",
+    "pomodoros": "Pomodoros",
+    "today": "Hoje",
+    "focusTime": "Tempo de Foco",
+    "breakTime": "Tempo de Pausa"
+  },
+  "projects": {
+    "title": "Projetos",
+    "newProject": "Novo Projeto",
+    "selectProject": "Escolha um projeto para começar",
+    "noProjects": "Nenhum projeto criado ainda",
+    "createFirst": "Crie seu primeiro projeto!",
+    "name": "Nome do Projeto",
+    "description": "Descrição",
+    "goal": "Meta de Pomodoros",
+    "color": "Cor",
+    "icon": "Ícone"
+  },
+  "settings": {
+    "title": "Configurações",
+    "general": "Geral",
+    "visual": "Visual",
+    "audio": "Áudio",
+    "notifications": "Notificações",
+    "shortcuts": "Atalhos",
+    "advanced": "Avançado"
+  },
+  "stats": {
+    "title": "Estatísticas",
+    "dashboard": "Dashboard",
+    "achievements": "Conquistas",
+    "reputation": "Reputação",
+    "streak": "Sequência"
+  },
+  "messages": {
+    "sessionStarted": "Sessão iniciada!",
+    "pomodoroComplete": "Pomodoro completo!",
+    "breakComplete": "Pausa completa!",
+    "goalReached": "Meta atingida!",
+    "achievementUnlocked": "Conquista desbloqueada!"
+  }
+}
